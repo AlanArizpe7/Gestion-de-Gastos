@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Presupuesto</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: lightblue;
+        padding: 20px;
+    }
+    #presupuesto {
+        font-size: 18px;
+        background-color: red;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 5px;
+    }
+    button {
+        padding: 10px;
+        background-color: lightgrey;
+        cursor: pointer;
+    }
+    #animacion {
+        margin-top: 10px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+</style>
+</head>
+<body>
+<div id="presupuesto">Presupuesto restante: $<span id="presupuestoValor">0.00</span></div>
+<input type="number" id="presupuestoInicial" placeholder="Presupuesto Inicial">
+<button onclick="configurarPresupuesto()">Configurar Presupuesto Inicial</button>
+<label for="nombreGasto">Nombre del gasto:</label>
+<input type="text" id="nombreGasto">
+<label for="cantidadGasto">Cantidad del gasto:</label>
+<input type="number" id="cantidadGasto">
+<button onclick="agregarGasto()">Agregar Gasto</button>
+<label for="ingreso">Ingreso de dinero:</label>
+<input type="number" id="ingreso">
+<button onclick="agregarIngreso()">Agregar Ingreso</button>
+<div id="animacion"></div>
+<table id="tabla">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+            <th>IVA</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody id="tablaBody">
+    </tbody>
+</table>
+<button onclick="mostrarGastosTerminados()">Gastos Terminados</button>
+
+<script>
+    let presupuesto = 0;
+    let gastos = [];
+    let totalGastos = 0;
+
+    function configurarPresupuesto() {
+        presupuesto = parseFloat(document.getElementById("presupuestoInicial").value);
+        document.getElementById("presupuestoValor").textContent = presupuesto.toFixed(2);
+        actualizarTabla();
+    }
+
+    function agregarGasto() {
+        const nombre = document.getElementById("nombreGasto").value;
+        const cantidad = parseFloat(document.getElementById("cantidadGasto").value);
+        if (cantidad > presupuesto) {
+            alert("El gasto excede el presupuesto disponible.");
+            return;
+        }
+        const iva = calcularIVA(cantidad);
+        totalGastos += cantidad;
+        presupuesto -= cantidad;
+        gastos.push({ nombre, cantidad, iva });
+        actualizarTabla();
+        limpiarCampos();
+    }
+
+    function agregarIngreso() {
+        const cantidad = parseFloat(document.getElementById("ingreso").value);
+        presupuesto += cantidad;
+        document.getElementById("presupuestoValor").textContent = presupuesto.toFixed(2);
+        limpiarCampos();
+    }
+
+    function calcularIVA(cantidad) {
+        return cantidad * 0.16;
+    }
+
+    function actualizarTabla() {
+        const tablaBody = document.getElementById("tablaBody");
+        tablaBody.innerHTML = "";
+        gastos.forEach((gasto, index) => {
+            const total = gasto.cantidad + gasto.iva;
+            const row = `
+                <tr>
+                    <td>${gasto.nombre}</td>
+                    <td>${gasto.cantidad.toFixed(2)}</td>
+                    <td>${gasto.iva.toFixed(2)}</td>
+                    <td>${total.toFixed(2)}</td>
+                </tr>
+            `;
+            tablaBody.innerHTML += row;
+        });
+        const totalGastosRow = `
+            <tr>
+                <td>Total Gastos</td>
+                <td></td>
+                <td></td>
+                <td>${totalGastos.toFixed(2)}</td>
+            </tr>
+        `;
+        tablaBody.innerHTML += totalGastosRow;
+    }
+
+    function limpiarCampos() {
+        document.getElementById("nombreGasto").value = "";
+        document.getElementById("cantidadGasto").value = "";
+        document.getElementById("ingreso").value = "";
+    }
+
+    function mostrarGastosTerminados() {
+        const mensaje = `Total de gastos realizados: $${totalGastos.toFixed(2)}\nDinero restante: $${presupuesto.toFixed(2)}`;
+        alert(mensaje);
+        gastos = [];
+        totalGastos = 0;
+        actualizarTabla();
+    }
+</script>
+</body>
+</html>
